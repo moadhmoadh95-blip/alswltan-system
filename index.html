@@ -11,38 +11,38 @@
         body { background-color: #f0f2f5; font-family: 'Cairo', sans-serif; margin: 0; padding: 10px; direction: rtl; }
         .container { max-width: 500px; margin: auto; }
         .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border-top: 5px solid #e67e22; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-family: 'Cairo'; }
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box; font-family: 'Cairo'; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
         .btn-main { background: #e67e22; color: white; }
-        .btn-done { background: #27ae60; color: white; width: auto; padding: 5px 15px; border-radius: 8px; border:none; cursor:pointer;}
+        .btn-done { background: #27ae60; color: white; width: auto; padding: 8px 15px; border-radius: 8px; border: none; }
         .order-item { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 10px solid #e67e22; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .notice { background: #fff3cd; padding: 15px; border-radius: 12px; text-align: center; border: 1px dashed #856404; margin-bottom: 15px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="container">
-    <div id="noticeBoard" class="notice" onclick="changeNotice()">📢 انقر لتغيير الإعلان</div>
-    <button id="unlockBtn" class="btn" style="background:#34495e; color:white;" onclick="unlock()">🔑 فتح قفل التسجيل</button>
+    <button id="unlockBtn" class="btn" style="background:#34495e; color:white;" onclick="unlockApp()">🔑 فتح قفل التسجيل</button>
+
     <div id="formSection" class="card" style="display:none;">
-        <h3 style="text-align:center; margin-top:0;">إضافة طلبية</h3>
-        <input type="text" id="itemName" placeholder="اسم الصنف...">
+        <h3 style="text-align:center; margin-top:0;">إضافة طلبية جديدة</h3>
+        <input type="text" id="itemName" placeholder="اسم الصنف (مثلاً: مشكل)">
         <div style="display:flex; gap:5px;">
             <input type="number" id="itemQty" placeholder="الكمية" style="flex:2;">
             <select id="itemUnit" style="flex:1;">
-                <option>كيلو</option><option>قطعة</option><option>صحن</option><option>لتر</option><option>بلاكة</option>
+                <option>كيلو</option><option>قطعة</option><option>صحن</option>
             </select>
         </div>
-        <input type="text" id="itemNote" placeholder="ملاحظات (اختياري)...">
         <select id="itemChef">
             <option>معاذ</option><option>مناف</option><option>حسين</option>
         </select>
-        <button class="btn btn-main" onclick="addOrder()">إرسال الطلب 🚀</button>
+        <button class="btn btn-main" onclick="saveOrder()">إرسال الطلب الآن 🚀</button>
     </div>
-    <h3 style="color:#e67e22;">🔥 قيد التحضير</h3>
+
+    <h3 style="color:#e67e22;">🔥 طلبات قيد التحضير</h3>
     <div id="ordersList"></div>
 </div>
 
 <script>
+    // إعدادات القاعدة
     const firebaseConfig = {
         apiKey: "AIzaSyAMTWxOCru9c8KOFRrQiFsvJ-52D8IxrPw",
         authDomain: "abujoud95.firebaseapp.com",
@@ -54,46 +54,51 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    window.unlock = function() {
-        if(prompt("كلمة السر:") === "1234") {
+    // دالة الفتح
+    function unlockApp() {
+        if (prompt("كلمة السر:") === "1234") {
             document.getElementById('formSection').style.display = 'block';
             document.getElementById('unlockBtn').style.display = 'none';
         }
-    };
+    }
 
-    window.addOrder = function() {
+    // دالة حفظ الطلب
+    function saveOrder() {
         const name = document.getElementById('itemName').value;
         const qty = document.getElementById('itemQty').value;
-        if(!name || !qty) return alert("دخل البيانات!");
-        db.collection("orders").add({
-            item: name, qty: qty,
-            unit: document.getElementById('itemUnit').value,
-            note: document.getElementById('itemNote').value,
-            chef: document.getElementById('itemChef').value,
-            status: "active", time: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            document.getElementById('itemName').value = ""; document.getElementById('itemQty').value = "";
-        });
-    };
+        
+        if (!name || !qty) {
+            alert("يا غالي عبّي الصنف والكمية!");
+            return;
+        }
 
+        db.collection("orders").add({
+            item: name,
+            qty: qty,
+            unit: document.getElementById('itemUnit').value,
+            chef: document.getElementById('itemChef').value,
+            status: "active",
+            time: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            document.getElementById('itemName').value = "";
+            document.getElementById('itemQty').value = "";
+            console.log("تم التسجيل بنجاح!");
+        }).catch((error) => {
+            alert("صار خطأ: " + error.message);
+        });
+    }
+
+    // عرض الطلبات مباشرة
     db.collection("orders").where("status", "==", "active").orderBy("time", "desc").onSnapshot(snap => {
         const list = document.getElementById('ordersList');
         list.innerHTML = "";
         snap.forEach(doc => {
             const d = doc.data();
             list.innerHTML += `<div class="order-item">
-                <div><b>${d.item}</b> (${d.qty} ${d.unit})<br><small>شيف: ${d.chef} | ${d.note}</small></div>
+                <div><b>${d.item}</b> (${d.qty} ${d.unit})<br><small>شيف: ${d.chef}</small></div>
                 <button class="btn-done" onclick="db.collection('orders').doc('${doc.id}').update({status:'done'})">جاهز</button>
             </div>`;
         });
-    });
-
-    window.changeNotice = function() {
-        const txt = prompt("الإعلان الجديد:");
-        if(txt) db.collection("config").doc("notice").set({ text: txt });
-    };
-    db.collection("config").doc("notice").onSnapshot(doc => {
-        if(doc.exists) document.getElementById('noticeBoard').innerText = "📢 " + doc.data().text;
     });
 </script>
 </body>
