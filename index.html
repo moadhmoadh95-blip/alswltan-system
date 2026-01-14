@@ -2,11 +2,11 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>نظام إدارة الطلبات</title>
+    <title>نظام إدارة حلويات أبو جود</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3081/3081920.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3081/3081920.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2413/2413074.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2413/2413074.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="إدارة الطلبات">
 
@@ -22,6 +22,7 @@
         button:active { transform: scale(0.98); }
         .order-card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; }
         .missing-card { background: #fff8f8; padding: 12px; margin-bottom: 10px; border-radius: 12px; border-right: 8px solid #c0392b; display: flex; justify-content: space-between; align-items: center; }
+        .btn-delete { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -48,10 +49,11 @@
                     <option>كيلو</option>
                     <option>لتر</option>
                     <option>بلاكة</option>
+                    <option>صحن</option>
                 </select>
             </div>
 
-            <input type="text" id="details" placeholder="ملاحظات (اختياري: مشكلات لون اسود صغيرة...)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 12px; background: #fffcf0;">
+            <input type="text" id="details" placeholder="ملاحظات (اختياري)..." style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 12px; background: #fffcf0;">
 
             <select id="chef" style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 12px;">
                 <option value="معاذ">الشيف معاذ</option>
@@ -94,48 +96,59 @@
         var audio = document.getElementById('notifSound');
         var isAudioEnabled = false;
 
+        // تفعيل الصوت عند أول نقرة
         window.addEventListener('click', function() {
             if (!isAudioEnabled) {
                 audio.play().then(() => {
                     audio.pause();
                     audio.currentTime = 0;
                     isAudioEnabled = true;
-                });
+                }).catch(e => console.log("Audio activation failed"));
             }
         }, { once: true });
 
         function playNotification() {
-            if (audio && isAudioEnabled) {
+            if (isAudioEnabled) {
                 audio.currentTime = 0;
-                audio.play();
+                audio.play().catch(e => console.log("Play failed"));
             }
             if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200]); // 📳 اهتزاز
+                navigator.vibrate([200, 100, 200]); 
             }
         }
 
         var firstLoad = true;
 
+        // دالة إرسال الطلب (تم إصلاحها)
         window.sendToFirebase = function() {
-          var it = item.value.trim();
-          var am = amount.value.trim();
-          if(!it || !am) return;
+          var it = document.getElementById('item').value.trim();
+          var am = document.getElementById('amount').value.trim();
+          var un = document.getElementById('unit').value;
+          var de = document.getElementById('details').value.trim();
+          var ch = document.getElementById('chef').value;
+
+          if(!it || !am) {
+              alert("يرجى إدخال اسم الصنف والكمية");
+              return;
+          }
 
           db.collection("orders").add({
             item: it,
             amount: am,
-            unit: unit.value,
-            details: details.value,
-            chef: chef.value,
+            unit: un,
+            details: de,
+            chef: ch,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
-
-          item.value = "";
-          amount.value = "";
-          details.value = "";
+          }).then(() => {
+              document.getElementById('item').value = "";
+              document.getElementById('amount').value = "";
+              document.getElementById('details').value = "";
+          }).catch(e => alert("خطأ في الإرسال: " + e.message));
         };
 
+        // عرض الطلبات
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(function(snap) {
+          var liveOrders = document.getElementById('liveOrders');
           liveOrders.innerHTML = "";
 
           if (!firstLoad && !snap.metadata.hasPendingWrites) {
@@ -147,31 +160,60 @@
             var d = doc.data();
             liveOrders.innerHTML += `
               <div class="order-card">
-                <div><b>${d.item}</b> - ${d.amount} ${d.unit}</div>
-                <button onclick="db.collection('orders').doc('${doc.id}').delete()">تم</button>
+                <div>
+                    <b>${d.item}</b> - ${d.amount} ${d.unit} <br>
+                    <small style="color: #7f8c8d;">الشيف: ${d.chef} ${d.details ? '| ' + d.details : ''}</small>
+                </div>
+                <button class="btn-delete" onclick="if(confirm('تم الإنجاز؟')) db.collection('orders').doc('${doc.id}').delete()">تم ✅</button>
               </div>`;
           });
         });
 
-        // ======== التعديل الوحيد هنا ========
-        var firstMissingLoad = true;
+        // التحكم في النموذج
+        window.unlockOrders = function() {
+            var pass = prompt("كلمة المرور:");
+            if(pass === "1234") {
+                document.getElementById('orderForm').style.display = 'block';
+                document.getElementById('lockBtn').style.display = 'none';
+            } else if(pass !== null) {
+                alert("خطأ!");
+            }
+        };
 
+        window.lockOrders = function() {
+            document.getElementById('orderForm').style.display = 'none';
+            document.getElementById('lockBtn').style.display = 'block';
+        };
+
+        // لوحة الملاحظات
+        window.updateNotice = function() {
+            var nt = prompt("الملاحظة الجديدة:");
+            if(nt) db.collection("settings").doc("notice").set({ text: nt });
+        };
+
+        db.collection("settings").doc("notice").onSnapshot(doc => {
+            if(doc.exists) document.getElementById('noticeBoard').innerText = doc.data().text;
+        });
+
+        // النواقص
+        var firstMissingLoad = true;
         window.sendMissingToFirebase = function() {
-          var mi = missingItem.value.trim();
+          var mi = document.getElementById('missingItem').value.trim();
           if(mi) {
               db.collection("missing").add({
                   name: mi,
-                  timestamp: firebase.firestore.Timestamp.now()
+                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
               });
-              missingItem.value = "";
+              document.getElementById('missingItem').value = "";
           }
         };
 
         db.collection("missing").orderBy("timestamp", "desc").onSnapshot(function(snap) {
+          var missingList = document.getElementById('missingList');
           missingList.innerHTML = "";
 
           if (!firstMissingLoad && !snap.metadata.hasPendingWrites) {
-              playNotification(); // 🔊 + 📳 للنواقص
+              playNotification(); 
           }
           firstMissingLoad = false;
 
@@ -179,7 +221,7 @@
             missingList.innerHTML += `
               <div class="missing-card">
                 <span>نقص: ${doc.data().name}</span>
-                <button onclick="db.collection('missing').doc('${doc.id}').delete()">تم</button>
+                <button class="btn-delete" onclick="db.collection('missing').doc('${doc.id}').delete()">تم</button>
               </div>`;
           });
         });
