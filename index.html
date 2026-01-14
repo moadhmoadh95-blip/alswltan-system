@@ -19,16 +19,16 @@
         .btn-green { background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
-<body>
-
-    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+<body onclick="enableAudio()"> <audio id="notifSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="container">
         <div id="noticeBoard" onclick="updateNotice()" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border: 2px dashed #856404; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; font-weight: bold; color: #856404; cursor: pointer;">
-            انقر هنا لتعديل الملاحظة العامة
+            جاري تحميل الملاحظة...
         </div>
 
-        <button id="lockBtn" onclick="unlockOrders()" style="width: 100%; padding: 12px; background: #34495e; color: white; border: none; border-radius: 12px; margin-bottom: 15px; font-weight: bold; cursor: pointer;">انقر لفتح نموذج الطلبات</button>
+        <button id="lockBtn" onclick="unlockOrders()" style="width: 100%; padding: 12px; background: #34495e; color: white; border: none; border-radius: 12px; margin-bottom: 15px; font-weight: bold; cursor: pointer;">🔑 انقر لفتح نموذج الطلبات</button>
 
         <div id="orderForm" style="display: none; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 8px solid #e67e22;">
             <h2 style="color: #e67e22; margin-top: 0; text-align: center; font-size: 22px;">تسجيل طلب جديد</h2>
@@ -75,19 +75,52 @@
         var db = firebase.firestore();
 
         var audio = document.getElementById('notifSound');
-        var isAudioEnabled = false;
+        var audioEnabled = false;
 
-        window.addEventListener('touchstart', function() {
-            if (!isAudioEnabled) {
-                audio.play().then(() => { audio.pause(); audio.currentTime = 0; isAudioEnabled = true; });
+        // دالة تفعيل الصوت (تشتغل عند أول لمسة للشاشة)
+        window.enableAudio = function() {
+            if (!audioEnabled) {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audioEnabled = true;
+                    console.log("Audio Enabled");
+                }).catch(e => console.log("Audio Error:", e));
             }
-        }, { once: true });
+        };
 
         function playNotification() {
-            if (isAudioEnabled) { audio.currentTime = 0; audio.play(); }
+            if (audioEnabled) {
+                audio.currentTime = 0;
+                audio.play();
+            }
             if (navigator.vibrate) { navigator.vibrate([200, 100, 200]); }
         }
 
+        var isFirstLoad = true;
+
+        // مراقبة الطلبات
+        db.collection("orders").orderBy("timestamp", "desc").onSnapshot(function(snap) {
+            var cont = document.getElementById('liveOrders');
+            cont.innerHTML = "";
+            
+            if (!isFirstLoad) {
+                snap.docChanges().forEach(function(change) {
+                    if (change.type === "added") { playNotification(); }
+                });
+            }
+            isFirstLoad = false;
+
+            snap.forEach(doc => {
+                var d = doc.data();
+                cont.innerHTML += `<div class="order-card">
+                    <div><b>${d.item}</b> - ${d.amount} ${d.unit}<br><small>الشيف: ${d.chef}</small></div>
+                    <button class="btn-green" onclick="if(confirm('تم الإنجاز؟')) db.collection('orders').doc('${doc.id}').delete()">تم ✅</button>
+                </div>`;
+            });
+        });
+
+        // باقي الوظائف (نفسها بدون تغيير)
         window.sendToFirebase = function() {
             var it = document.getElementById('item').value.trim();
             var am = document.getElementById('amount').value.trim();
@@ -100,18 +133,6 @@
                 document.getElementById('item').value = ""; document.getElementById('amount').value = ""; document.getElementById('details').value = "";
             });
         };
-
-        db.collection("orders").orderBy("timestamp", "desc").onSnapshot(function(snap) {
-            var cont = document.getElementById('liveOrders');
-            cont.innerHTML = "";
-            snap.forEach(doc => {
-                var d = doc.data();
-                cont.innerHTML += `<div class="order-card">
-                    <div><b>${d.item}</b> - ${d.amount} ${d.unit}<br><small>الشيف: ${d.chef}</small></div>
-                    <button class="btn-green" onclick="if(confirm('تم الإنجاز؟')) db.collection('orders').doc('${doc.id}').delete()">تم ✅</button>
-                </div>`;
-            });
-        });
 
         window.sendMissingToFirebase = function() {
             var mi = document.getElementById('missingItem').value.trim();
@@ -150,6 +171,7 @@
 
         db.collection("settings").doc("notice").onSnapshot(doc => {
             if(doc.exists) document.getElementById('noticeBoard').innerText = doc.data().text;
+            else document.getElementById('noticeBoard').innerText = "انقر لتعديل الملاحظة العامة";
         });
     </script>
 </body>
