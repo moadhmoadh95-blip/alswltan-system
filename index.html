@@ -5,7 +5,6 @@
     <title>نظام حلويات أبو جود</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2413/2413074.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2413/2413074.png">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -25,15 +24,12 @@
     <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <div class="container">
-        <!-- لوحة الإعلانات -->
         <div id="noticeBoard" onclick="updateNotice()" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border: 2px dashed #856404; padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; font-weight: bold; color: #856404; cursor: pointer;">
             انقر هنا لتعديل الملاحظة العامة
         </div>
 
-        <!-- زر فتح القفل -->
         <button id="lockBtn" onclick="unlockOrders()" style="width: 100%; padding: 12px; background: #34495e; color: white; border: none; border-radius: 12px; margin-bottom: 15px; font-weight: bold; cursor: pointer;">انقر لفتح نموذج الطلبات</button>
 
-        <!-- نموذج الطلب -->
         <div id="orderForm" style="display: none; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 8px solid #e67e22;">
             <h2 style="color: #e67e22; margin-top: 0; text-align: center; font-size: 22px;">تسجيل طلب جديد</h2>
             <input type="text" id="item" placeholder="اسم الصنف..." style="padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 12px;">
@@ -56,7 +52,6 @@
 
         <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
-        <!-- قسم النواقص -->
         <div style="background: #fff; padding: 20px; border-radius: 20px; border-top: 8px solid #c0392b; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
             <h3 style="color: #c0392b; margin-top: 0;">قائمة النواقص</h3>
             <div style="display: flex; gap: 8px;">
@@ -69,21 +64,20 @@
 
     <script>
         var config = {
-          apiKey: "AIzaSyAMTWxOCru9c8KOFRrQiFsvJ-52D8IxrPw",
-          authDomain: "abujoud95.firebaseapp.com",
-          projectId: "abujoud95",
-          storageBucket: "abujoud95.firebasestorage.app",
-          messagingSenderId: "85673334000",
-          appId: "1:85673334000:web:707a2bfbd8e2ec6b11de35"
+            apiKey: "AIzaSyAMTWxOCru9c8KOFRrQiFsvJ-52D8IxrPw",
+            authDomain: "abujoud95.firebaseapp.com",
+            projectId: "abujoud95",
+            storageBucket: "abujoud95.appspot.com",
+            messagingSenderId: "85673334000",
+            appId: "1:85673334000:web:707a2bfbd8e2ec6b11de35"
         };
         if (!firebase.apps.length) { firebase.initializeApp(config); }
         var db = firebase.firestore();
 
-        // --- نظام الصوت والاهتزاز ---
         var audio = document.getElementById('notifSound');
         var isAudioEnabled = false;
 
-        window.addEventListener('click', function() {
+        window.addEventListener('touchstart', function() {
             if (!isAudioEnabled) {
                 audio.play().then(() => { audio.pause(); audio.currentTime = 0; isAudioEnabled = true; });
             }
@@ -94,8 +88,6 @@
             if (navigator.vibrate) { navigator.vibrate([200, 100, 200]); }
         }
 
-        // --- وظائف الطلبات ---
-        var firstLoad = true;
         window.sendToFirebase = function() {
             var it = document.getElementById('item').value.trim();
             var am = document.getElementById('amount').value.trim();
@@ -112,10 +104,6 @@
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(function(snap) {
             var cont = document.getElementById('liveOrders');
             cont.innerHTML = "";
-            var hasNew = false;
-            snap.docChanges().forEach(change => { if (change.type === "added") hasNew = true; });
-            if (!firstLoad && hasNew && !snap.metadata.hasPendingWrites) playNotification();
-            firstLoad = false;
             snap.forEach(doc => {
                 var d = doc.data();
                 cont.innerHTML += `<div class="order-card">
@@ -125,8 +113,6 @@
             });
         });
 
-        // --- وظائف النواقص ---
-        var firstMissingLoad = true;
         window.sendMissingToFirebase = function() {
             var mi = document.getElementById('missingItem').value.trim();
             if(mi) {
@@ -138,28 +124,30 @@
         db.collection("missing").orderBy("timestamp", "desc").onSnapshot(function(snap) {
             var list = document.getElementById('missingList');
             list.innerHTML = "";
-            var hasNew = false;
-            snap.docChanges().forEach(change => { if (change.type === "added") hasNew = true; });
-            if (!firstMissingLoad && hasNew && !snap.metadata.hasPendingWrites) playNotification();
-            firstMissingLoad = false;
             snap.forEach(doc => {
                 list.innerHTML += `<div class="missing-card"><span>نقص: ${doc.data().name}</span>
                 <button class="btn-green" onclick="db.collection('missing').doc('${doc.id}').delete()">تم</button></div>`;
             });
         });
 
-        // --- وظائف التحكم والإعلانات ---
         window.unlockOrders = function() {
             var pass = prompt("كلمة المرور:");
-            if(pass === "1234") { document.getElementById('orderForm').style.display = 'block'; document.getElementById('lockBtn').style.display = 'none'; }
-            else if(pass !== null) alert("خطأ!");
+            if(pass === "1234") { 
+                document.getElementById('orderForm').style.display = 'block'; 
+                document.getElementById('lockBtn').style.display = 'none'; 
+            } else if(pass !== null) alert("خطأ!");
         };
-        window.lockOrders = function() { document.getElementById('orderForm').style.display = 'none'; document.getElementById('lockBtn').style.display = 'block'; };
+        
+        window.lockOrders = function() { 
+            document.getElementById('orderForm').style.display = 'none'; 
+            document.getElementById('lockBtn').style.display = 'block'; 
+        };
         
         window.updateNotice = function() {
             var nt = prompt("الملاحظة الجديدة:");
             if(nt !== null && nt.trim() !== "") db.collection("settings").doc("notice").set({ text: nt });
         };
+
         db.collection("settings").doc("notice").onSnapshot(doc => {
             if(doc.exists) document.getElementById('noticeBoard').innerText = doc.data().text;
         });
