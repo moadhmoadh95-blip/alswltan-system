@@ -17,11 +17,22 @@
         .img-container { width: 100%; height: 150px; background: #eee; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .cat-card b { display: block; padding: 10px; font-size: 16px; font-weight: bold; }
+        
+        /* أزرار السلة والواتساب */
         .cart-btn { position: fixed; bottom: 20px; left: 20px; background: var(--gold); color: #000; padding: 15px 25px; border-radius: 50px; font-weight: bold; border: none; z-index: 1000; cursor: pointer; }
         .whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; text-align: center; font-size: 30px; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 1000; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; }
-        .modal-content { background: white; width: 90%; max-width: 400px; margin: 50px auto; padding: 25px; border-radius: 20px; }
-        .input-style { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
+        
+        /* النافذة المنبثقة */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto; }
+        .modal-content { background: white; width: 90%; max-width: 450px; margin: 30px auto; padding: 20px; border-radius: 20px; }
+        
+        .sub-item-list { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
+        .sub-item { padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #f9f9f9; cursor: pointer; text-align: right; transition: 0.2s; }
+        .sub-item:hover { background: #fff9e6; border-color: var(--gold); }
+        .sub-item.selected { background: var(--gold); color: black; border-color: var(--dark); font-weight: bold; }
+
+        .input-style { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
+        .btn-add { width: 100%; padding: 15px; background: var(--dark); color: var(--gold); border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -33,50 +44,64 @@
 
 <div class="categories">
     <div class="cat-card" onclick="openSection('حلويات غربية')">
-        <div class="img-container"><img src="https://i.ibb.co/YB79brdz/6.jpg?v=2"></div>
-        <b>الغربي</b>
+        <div class="img-container"><img src="https://i.ibb.co/YB79brdz/6.jpg"></div>
+        <b>الحلويات الغربية</b>
     </div>
     <div class="cat-card" onclick="openSection('حلويات شرقية')">
-        <div class="img-container"><img src="https://i.ibb.co/Qv7SS0LT/baklava-600x451.jpg?v=2"></div>
-        <b>الشرقي</b>
+        <div class="img-container"><img src="https://i.ibb.co/Qv7SS0LT/baklava-600x451.jpg"></div>
+        <b>الحلويات الشرقية</b>
     </div>
     <div class="cat-card" onclick="openSection('عصائر طبيعية')">
-        <div class="img-container"><img src="https://i.ibb.co/jv8tRFj9/pngtree-different-juices-on-black-background-image-15823155.jpg?v=2"></div>
+        <div class="img-container"><img src="https://i.ibb.co/jv8tRFj9/pngtree-different-juices-on-black-background-image-15823155.jpg"></div>
         <b>العصائر</b>
     </div>
     <div class="cat-card" onclick="openSection('كنافات')">
-        <div class="img-container"><img src="https://i.ibb.co/7xn6ZK7b/Ed-J01-YMXo-AEr-O57.jpg?v=2"></div>
+        <div class="img-container"><img src="https://i.ibb.co/7xn6ZK7b/Ed-J01-YMXo-AEr-O57.jpg"></div>
         <b>الكنافة</b>
     </div>
-    <div class="cat-card" onclick="openSection('موالح ومكسرات')">
-        <div class="img-container"><img src="https://i.ibb.co/fVHST25v/featured-1-hub6e3f8dc209b40c9147f217b474e1546-264963-800x534-fill-q75-box-bottomleft.jpg?v=2"></div>
-        <b>الموالح</b>
-    </div>
-    <div class="cat-card" onclick="openSection('بوكسات مميزة')">
-        <div class="img-container"><img src="https://i.ibb.co/tPBj2g7Y/images.jpg?v=2"></div>
-        <b>البوكسات</b>
-    </div>
-    <div class="cat-card" onclick="openSection('كيك مناسبات')">
-        <div class="img-container"><img src="https://i.ibb.co/KzVGcc7Q/image.jpg?v=2"></div>
-        <b>كيك المناسبات</b>
+</div>
+
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <h3 id="selectedCat" style="text-align:center; color:var(--gold); margin-top:0;"></h3>
+        <p style="text-align:center; font-size:14px; color:#666;">اختر الصنف المطلوب:</p>
+        
+        <div id="subItems" class="sub-item-list">
+            </div>
+
+        <input type="text" id="custName" class="input-style" placeholder="الاسم الكريم">
+        <input type="tel" id="custPhone" class="input-style" placeholder="رقم الهاتف">
+        <input type="text" id="custNote" class="input-style" placeholder="ملاحظات إضافية (مثلاً: الكمية)">
+        
+        <button class="btn-add" onclick="addToCart()">إضافة للسلة 🛒</button>
+        <button onclick="closeModal()" style="width:100%; margin-top:10px; background:none; border:none; color:#999; cursor:pointer;">إلغاء</button>
     </div>
 </div>
 
 <button class="cart-btn" onclick="showCart()">🛒 السلة (<span id="cartCount">0</span>)</button>
 <a href="https://wa.me/218911803006" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
-<div id="orderModal" class="modal">
-    <div class="modal-content">
-        <h3 id="selectedCat" style="text-align:center; color:var(--gold);"></h3>
-        <input type="text" id="custName" class="input-style" placeholder="الاسم">
-        <input type="tel" id="custPhone" class="input-style" placeholder="رقم الهاتف">
-        <input type="text" id="custItem" class="input-style" placeholder="طلبك..">
-        <button onclick="addToCart()" style="width:100%; padding:15px; background:var(--dark); color:var(--gold); border:none; border-radius:10px; font-weight:bold;">إضافة للطلب</button>
-        <button onclick="closeModal()" style="width:100%; margin-top:10px; background:none; border:none; color:#999;">إغلاق</button>
-    </div>
-</div>
-
 <script>
+    // بيانات الأصناف التي زودتني بها
+    const menuData = {
+        'حلويات غربية': ['قسم الطورطات', 'قسم الكيكات', 'قسم الكيكات mini'],
+        'حلويات شرقية': [
+            'بكلاوة لوز عسل عادي', 
+            'بكلاوة لوز عسل طبيعي', 
+            'بكلاوة كاكاوية عسل عادي', 
+            'بكلاوة كاكاوية مرشقة',
+            'حجيبات لوز',
+            'حجيبات كاكاوية',
+            'اصابع لوز عسل طبيعي'
+        ],
+        'عصائر طبيعية': ['عصير مشكل', 'عصير فواكه موسمية'],
+        'كنافات': ['كنافة بالمكسرات', 'كنافة بالجبنة']
+    };
+
+    let selectedSubItem = "";
+    let cart = [];
+
+    // إعدادات Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAMTWxOCru9c8KOFRrQiFsvJ-52D8IxrPw",
         authDomain: "abujoud95.firebaseapp.com",
@@ -85,42 +110,70 @@
         messagingSenderId: "85673334000",
         appId: "1:85673334000:web:707a2bfbd8e2ec6b11de35"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let cart = [];
-    let currentCat = "";
-
     function openSection(cat) {
-        currentCat = cat;
+        const modal = document.getElementById('orderModal');
+        const subItemsDiv = document.getElementById('subItems');
         document.getElementById('selectedCat').innerText = cat;
-        document.getElementById('orderModal').style.display = 'block';
+        subItemsDiv.innerHTML = "";
+        selectedSubItem = "";
+
+        if(menuData[cat]) {
+            menuData[cat].forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'sub-item';
+                div.innerText = item;
+                div.onclick = function() {
+                    document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSubItem = item;
+                };
+                subItemsDiv.appendChild(div);
+            });
+        }
+        modal.style.display = 'block';
     }
 
     function closeModal() { document.getElementById('orderModal').style.display = 'none'; }
 
     function addToCart() {
-        const item = document.getElementById('custItem').value;
         const name = document.getElementById('custName').value;
         const phone = document.getElementById('custPhone').value;
-        if(!item || !name || !phone) return alert("يرجى تعبئة البيانات");
-        cart.push({ cat: currentCat, item: item, customer: name, phone: phone });
+        const note = document.getElementById('custNote').value;
+        
+        if(!selectedSubItem) return alert("يرجى اختيار الصنف أولاً");
+        if(!name || !phone) return alert("يرجى إدخال الاسم والهاتف");
+
+        cart.push({
+            item: selectedSubItem,
+            category: document.getElementById('selectedCat').innerText,
+            customer: name,
+            phone: phone,
+            note: note
+        });
+
         document.getElementById('cartCount').innerText = cart.length;
+        alert("تمت الإضافة: " + selectedSubItem);
         closeModal();
     }
 
     function showCart() {
         if(cart.length === 0) return alert("السلة فارغة");
-        if(confirm("تأكيد إرسال الطلب؟")) {
+        let sum = "طلباتك:\n";
+        cart.forEach((c, i) => sum += `${i+1}- ${c.item} (${c.note || 'بدون ملاحظات'})\n`);
+        
+        if(confirm(sum + "\nإرسال الطلب للمحل؟")) {
             cart.forEach(o => {
                 db.collection("orders").add({
                     item: o.item,
-                    details: `الزبون: ${o.customer} | هاتف: ${o.phone}`,
+                    details: `الزبون: ${o.customer} | هاتف: ${o.phone} | ملاحظة: ${o.note}`,
                     unit: "متجر",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
-            alert("تم الطلب!");
+            alert("وصل طلبك للسلطان! سيتم التواصل معك قريباً.");
             cart = [];
             document.getElementById('cartCount').innerText = "0";
         }
