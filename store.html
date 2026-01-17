@@ -13,19 +13,19 @@
         body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding-bottom: 100px; }
         header { background: var(--dark); color: var(--gold); padding: 20px; text-align: center; border-bottom: 5px solid var(--gold); }
         .categories { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; max-width: 800px; margin: auto; }
-        .cat-card { background: white; border-radius: 15px; overflow: hidden; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #ddd; }
-        .img-container { width: 100%; height: 130px; background: #eee; }
+        .cat-card { background: white; border-radius: 15px; overflow: hidden; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid #ddd; height: 200px; }
+        .img-container { width: 100%; height: 140px; background: #eee; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .cat-card b { display: block; padding: 8px; font-size: 14px; font-weight: bold; }
+        .cat-card b { display: block; padding: 10px; font-size: 14px; font-weight: bold; }
         .cart-btn { position: fixed; bottom: 20px; left: 20px; background: var(--gold); color: #000; padding: 15px 25px; border-radius: 50px; font-weight: bold; border: none; z-index: 1000; cursor: pointer; font-family: 'Cairo'; }
         .whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; text-align: center; font-size: 30px; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 1000; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto; }
         .modal-content { background: white; width: 92%; max-width: 450px; margin: 20px auto; padding: 20px; border-radius: 20px; box-sizing: border-box; }
         .sub-item-list { display: flex; flex-direction: column; gap: 8px; margin: 15px 0; }
-        .sub-item { padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #f9f9f9; cursor: pointer; text-align: right; font-size: 14px; }
-        .sub-item.selected { background: var(--gold); color: black; border-color: var(--dark); font-weight: bold; }
-        .input-style { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; font-size: 15px; }
-        .btn-add { width: 100%; padding: 15px; background: var(--dark); color: var(--gold); border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .sub-item { padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #f9f9f9; cursor: pointer; text-align: right; }
+        .sub-item.selected { background: var(--gold); color: black; font-weight: bold; }
+        .input-style { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; }
+        .btn-add { width: 100%; padding: 15px; background: var(--dark); color: var(--gold); border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -38,43 +38,46 @@
 <div class="categories">
     <div class="cat-card" onclick="openSection('حلويات غربية')">
         <div class="img-container"><img src="https://i.ibb.co/YB79brdz/6.jpg"></div>
-        <b>الحلويات الغربية</b>
+        <b>الغربي</b>
     </div>
     <div class="cat-card" onclick="openSection('حلويات شرقية')">
         <div class="img-container"><img src="https://i.ibb.co/Qv7SS0LT/baklava-600x451.jpg"></div>
-        <b>الحلويات الشرقية</b>
+        <b>الشرقي</b>
     </div>
     <div class="cat-card" onclick="openSection('عصائر طبيعية')">
         <div class="img-container"><img src="https://i.ibb.co/jv8tRFj9/pngtree-different-juices-on-black-background-image-15823155.jpg"></div>
-        <b>العصائر الطبيعية</b>
+        <b>العصائر</b>
     </div>
+    
     <div class="cat-card" onclick="openSection('كنافات')">
         <div class="img-container"><img src="https://i.ibb.co/7xn6ZK7b/Ed-J01-YMXo-AEr-O57.jpg"></div>
-        <b>قسم الكنافات</b>
+        <b>الكنافة</b>
     </div>
+
     <div class="cat-card" onclick="openSection('موالح ومكسرات')">
         <div class="img-container"><img src="https://i.ibb.co/fVHST25v/featured-1-hub6e3f8dc209b40c9147f217b474e1546-264963-800x534-fill-q75-box-bottomleft.jpg"></div>
-        <b>الموالح والمكسرات</b>
+        <b>الموالح</b>
     </div>
+
     <div class="cat-card" onclick="openSection('بوكسات السلطان')">
         <div class="img-container"><img src="https://i.ibb.co/tPBj2g7Y/images.jpg"></div>
-        <b>البوكسات المميزة</b>
+        <b>البوكسات</b>
     </div>
     <div class="cat-card" onclick="openSection('كيك المناسبات')">
         <div class="img-container"><img src="https://i.ibb.co/KzVGcc7Q/image.jpg"></div>
-        <b>كيك المناسبات</b>
+        <b>الكيك</b>
     </div>
 </div>
 
 <div id="orderModal" class="modal">
     <div class="modal-content">
-        <h3 id="selectedCat" style="text-align:center; color:var(--gold); margin:0;"></h3>
+        <h3 id="selectedCat" style="text-align:center; color:var(--gold);"></h3>
         <div id="subItems" class="sub-item-list"></div>
-        <input type="text" id="custName" class="input-style" placeholder="الاسم الكريم">
+        <input type="text" id="custName" class="input-style" placeholder="الاسم">
         <input type="tel" id="custPhone" class="input-style" placeholder="رقم الهاتف">
-        <input type="text" id="custNote" class="input-style" placeholder="الكمية أو ملاحظة إضافية">
-        <button class="btn-add" onclick="addToCart()">إضافة للسلة 🛒</button>
-        <button onclick="closeModal()" style="width:100%; margin-top:10px; background:none; border:none; color:#999; cursor:pointer;">إغلاق</button>
+        <input type="text" id="custNote" class="input-style" placeholder="الكمية / ملاحظة">
+        <button class="btn-add" onclick="addToCart()">إضافة 🛒</button>
+        <button onclick="closeModal()" style="width:100%; border:none; background:none; margin-top:10px; color:#999;">إغلاق</button>
     </div>
 </div>
 
@@ -84,16 +87,12 @@
 <script>
     const menuData = {
         'حلويات غربية': ['قسم الطورطات', 'قسم الكيكات', 'قسم الكيكات mini'],
-        'حلويات شرقية': [
-            'بكلاوة لوز عسل عادي', 'بكلاوة لوز عسل طبيعي', 
-            'بكلاوة كاكاوية عسل عادي', 'بكلاوة كاكاوية مرشقة',
-            'حجيبات لوز', 'حجيبات كاكاوية', 'اصابع لوز عسل طبيعي'
-        ],
-        'عصائر طبيعية': ['عصير مشكل', 'عصير طبيعي 100%'],
+        'حلويات شرقية': ['بكلاوة لوز عسل عادي', 'بكلاوة لوز عسل طبيعي', 'بكلاوة كاكاوية عسل عادي', 'بكلاوة كاكاوية مرشقة', 'حجيبات لوز', 'حجيبات كاكاوية', 'اصابع لوز عسل طبيعي'],
+        'عصائر طبيعية': ['عصير مشكل', 'عصير طبيعي'],
         'كنافات': ['كنافة باللوز', 'كنافة بالقشطة'],
-        'موالح ومكسرات': ['لوز محمص', 'كاجو', 'تشكيلة موالح'],
+        'موالح ومكسرات': ['لوز محمص', 'كاجو', 'موالح مشكلة'],
         'بوكسات السلطان': ['بوكس العائلة', 'بوكس ملكي'],
-        'كيك المناسبات': ['كيك عيد ميلاد', 'كيك زفاف']
+        'كيك المناسبات': ['كيك ميلاد', 'كيك زفاف']
     };
 
     let selectedSubItem = "";
@@ -137,8 +136,7 @@
         const name = document.getElementById('custName').value;
         const phone = document.getElementById('custPhone').value;
         const note = document.getElementById('custNote').value;
-        if(!selectedSubItem) return alert("اختر الصنف المطلوب");
-        if(!name || !phone) return alert("يرجى إدخال الاسم والهاتف");
+        if(!selectedSubItem || !name || !phone) return alert("كمل البيانات");
         cart.push({ item: selectedSubItem, customer: name, phone: phone, note: note });
         document.getElementById('cartCount').innerText = cart.length;
         closeModal();
@@ -146,9 +144,7 @@
 
     function showCart() {
         if(cart.length === 0) return alert("السلة فارغة");
-        let sum = "طلباتك:\n";
-        cart.forEach((c, i) => sum += `${i+1}- ${c.item}\n`);
-        if(confirm(sum + "\nإرسال الطلب للمحل؟")) {
+        if(confirm("إرسال الطلب؟")) {
             cart.forEach(o => {
                 db.collection("orders").add({
                     item: o.item,
@@ -157,7 +153,7 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
-            alert("تم إرسال طلبك!");
+            alert("تم الطلب!");
             cart = [];
             document.getElementById('cartCount').innerText = "0";
         }
