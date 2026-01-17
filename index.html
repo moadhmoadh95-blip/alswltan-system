@@ -143,17 +143,17 @@
         if(cart.length === 0) return alert("السلة فارغة");
         if(confirm("إرسال الطلب؟")) {
             cart.forEach(o => {
-                // تعديل طريقة إرسال البيانات لتكون مفصلة
+                // تجميع كل التفاصيل في حقل واحد لضمان ظهورها في المنصة
+                const fullDetails = `الزبون: ${o.customer} - هاتف: ${o.phone} - ملاحظة: ${o.note}`;
+                
                 db.collection("orders").add({
-                    item: o.item,               // اسم الصنف
-                    customer_name: o.customer,  // اسم الزبون
-                    customer_phone: o.phone,    // رقم الهاتف
-                    order_note: o.note,         // الملاحظة أو الكمية
-                    unit: "متجر أونلاين",
+                    item: o.item,
+                    details: fullDetails, // هذا الحقل هو ما تبحث عنه المنصة
+                    unit: "متجر",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
-            alert("تم إرسال طلبك بنجاح!");
+            alert("تم إرسال الطلب بنجاح!");
             cart = [];
             document.getElementById('cartCount').innerText = "0";
         }
