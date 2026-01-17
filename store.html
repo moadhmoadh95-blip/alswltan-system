@@ -17,17 +17,13 @@
         .img-container { width: 100%; height: 130px; background: #eee; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .cat-card b { display: block; padding: 8px; font-size: 14px; font-weight: bold; }
-        
         .cart-btn { position: fixed; bottom: 20px; left: 20px; background: var(--gold); color: #000; padding: 15px 25px; border-radius: 50px; font-weight: bold; border: none; z-index: 1000; cursor: pointer; font-family: 'Cairo'; }
         .whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25d366; color: white; width: 60px; height: 60px; border-radius: 50%; text-align: center; font-size: 30px; display: flex; align-items: center; justify-content: center; text-decoration: none; z-index: 1000; }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto; }
         .modal-content { background: white; width: 92%; max-width: 450px; margin: 20px auto; padding: 20px; border-radius: 20px; box-sizing: border-box; }
-        
         .sub-item-list { display: flex; flex-direction: column; gap: 8px; margin: 15px 0; }
         .sub-item { padding: 12px; border: 1px solid #eee; border-radius: 10px; background: #f9f9f9; cursor: pointer; text-align: right; font-size: 14px; }
         .sub-item.selected { background: var(--gold); color: black; border-color: var(--dark); font-weight: bold; }
-
         .input-style { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ccc; border-radius: 10px; box-sizing: border-box; font-family: 'Cairo'; font-size: 15px; }
         .btn-add { width: 100%; padding: 15px; background: var(--dark); color: var(--gold); border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
     </style>
@@ -93,11 +89,11 @@
             'بكلاوة كاكاوية عسل عادي', 'بكلاوة كاكاوية مرشقة',
             'حجيبات لوز', 'حجيبات كاكاوية', 'اصابع لوز عسل طبيعي'
         ],
-        'عصائر طبيعية': ['عصير مشكل', 'عصير فواكه موسمية', 'عصير طبيعي 100%'],
-        'كنافات': ['كنافة باللوز', 'كنافة بالقشطة', 'كنافة بورمة'],
-        'موالح ومكسرات': ['لوز محمص', 'كاجو', 'تشكيلة موالح فخمة'],
-        'بوكسات السلطان': ['بوكس العائلة', 'بوكس الضيافة', 'بوكس ملكي'],
-        'كيك المناسبات': ['كيك عيد ميلاد', 'كيك زفاف', 'تورتة خاصة بالطلب']
+        'عصائر طبيعية': ['عصير مشكل', 'عصير طبيعي 100%'],
+        'كنافات': ['كنافة باللوز', 'كنافة بالقشطة'],
+        'موالح ومكسرات': ['لوز محمص', 'كاجو', 'تشكيلة موالح'],
+        'بوكسات السلطان': ['بوكس العائلة', 'بوكس ملكي'],
+        'كيك المناسبات': ['كيك عيد ميلاد', 'كيك زفاف']
     };
 
     let selectedSubItem = "";
@@ -111,7 +107,7 @@
         messagingSenderId: "85673334000",
         appId: "1:85673334000:web:707a2bfbd8e2ec6b11de35"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function openSection(cat) {
@@ -142,7 +138,7 @@
         const phone = document.getElementById('custPhone').value;
         const note = document.getElementById('custNote').value;
         if(!selectedSubItem) return alert("اختر الصنف المطلوب");
-        if(!name || !phone) return alert("دخل الاسم والرقم");
+        if(!name || !phone) return alert("يرجى إدخال الاسم والهاتف");
         cart.push({ item: selectedSubItem, customer: name, phone: phone, note: note });
         document.getElementById('cartCount').innerText = cart.length;
         closeModal();
@@ -161,7 +157,7 @@
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
             });
-            alert("تم الطلب بنجاح!");
+            alert("تم إرسال طلبك!");
             cart = [];
             document.getElementById('cartCount').innerText = "0";
         }
